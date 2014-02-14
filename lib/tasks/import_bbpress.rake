@@ -117,15 +117,12 @@ def sql_fetch_posts(*parse)
 
   loop do
     query =<<EOQ
-      SELECT t.topic_id, t.topic_title,
-      u.user_login, u.id,
-      f.forum_name,
-      p.post_time, p.post_text
-      FROM bb_posts p
-      JOIN bb_topics t on t.topic_id = p.topic_id
-      JOIN bb_users u ON u.id = p.poster_id
-      JOIN bb_forums f on t.forum_id = f.forum_id
-      ORDER BY t.topic_id ASC, t.topic_title ASC, p.post_id ASC
+      SELECT p.id AS topic_id, u.user_login, f.post_title AS forum_name, p.post_date AS post_time, p.post_title AS topic_title, p.post_content AS post_text, p.post_type, p.post_parent
+      FROM wp_posts p
+      INNER JOIN wp_users u on u.id = p.post_author
+      LEFT JOIN (SELECT id, post_title FROM wp_posts WHERE post_type = 'forum') AS f on f.id = p.post_parent
+      WHERE post_type IN ('topic', 'reply')
+      ORDER BY p.id ASC, p.post_title ASC
       LIMIT #{@offset.to_s}, 500;
 EOQ
     puts query.yellow if @offset == 0
@@ -165,19 +162,20 @@ def sql_import_posts
     end
 
     # get the discourse user of this post
-    dc_user = dc_get_user(bbpress_username_to_dc(user['user_login']))
+    dc_username = bbpress_username_to_dc(bbpress_post['user_login'])
+    if(dc_username.length < 3)
+      dc_username = dc_username.ljust(3, '0')
+    end
 
-    category = create_category(
-      bbpress_post['forum_name'].downcase,
-      DC_ADMIN
-    )
+    dc_user = dc_get_user(dc_username)
 
     topic_title = sanitize_topic bbpress_post['topic_title']
 
     is_new_topic = false
 
-    topic = topics[bbpress_post['topic_id']]
-    if topic.nil?
+    topic = topics[bbpress_post['post_parent']]
+
+    if bbpress_post['post_type'] == 'topic'
       is_new_topic = true
     end
 
@@ -189,6 +187,12 @@ def sql_import_posts
     post_creator = nil
 
     if is_new_topic
+      # create category if it doesn't exist
+      category = create_category(
+        bbpress_post['forum_name'].downcase,
+        DC_ADMIN
+      )
+
       print "\n[#{progress}%] Creating topic ".yellow + topic_title +
         " (#{Time.at(bbpress_post['post_time'])}) in category ".yellow +
           "#{category.name}"
@@ -206,6 +210,9 @@ def sql_import_posts
           ## for a new topic: also clear mail deliveries
           ActionMailer::Base.deliveries = []
     else
+      # skip to the next record if this record doesn't have a parent
+      next if topic == nil
+
       print ".".yellow
       $stdout.flush
       post_creator = PostCreator.new(
@@ -263,7 +270,7 @@ def create_users
     end
     dc_email = bbpress_user['user_email']
     # create email address
-    if dc_email.nil? or dc_email.empty? then
+    if dc_email.nil? or dc_email.empty? or dc_email.include? "mailinator.com" then
       dc_email = dc_username + "@has.no.email"
     end
 
@@ -308,7 +315,7 @@ def sql_fetch_users
     count = 0
     query = <<EOQ
       SELECT id, user_login, user_pass, user_nicename, user_email, user_url, user_registered, user_status, display_name
-      FROM bb_users
+      FROM wp_users
       LIMIT #{offset}, 50;
 EOQ
 

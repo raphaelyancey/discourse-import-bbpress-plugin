@@ -1,7 +1,7 @@
 # What is this
 
 This set of rake tasks imports users, threads, and posts from a bbPress
-instance into Discourse.
+instance into Discourse. This is an update to [Wayne Graham's](https://github.com/waynegraham/discourse-import-bbpress) plugin that was built specifically for a bbPress standalone instance. My update is works specifically with the bbPress Plugin for Wordpress. bbPress standalone has been deprecated for some time now.
 
 * Post dates and authors are preserved
 * User accounts are created from bbPress, but have no login
@@ -14,39 +14,51 @@ users will need to log in to activate their accounts.
 installation first.
 
 # Instructions
+  
+* *Run these commands as the discourse user `sudo su - discourse`*
+  
+* Head over to the discourse directory `cd /var/www/discourse`
 
-* **Important:** *disable* your email configuration or ou will spam all
-  your users with hundreds of emails. To do this, add this to your
-environemnt config (e.g. `config/environments/development.rb`):
+* **Important:** *disable* your email configuration or you will spam all your users with hundreds of emails.
 
-```ruby
-config.action_mailer.delivery_method = :test
-config.action_mailer.smtp_settings = { address: "localhost", port: 1025 }
-```
+  Add this to your environment config: `config/environments/development.rb`
 
-Install and start `mailcatcher` to monitor the sending of notification
-emails:
+  ```ruby
+  config.action_mailer.delivery_method = :test
+  config.action_mailer.smtp_settings = { address: "localhost", port: 1025 }
+  ```
 
-```shell
-$ gem install mailcatcher
-$ mailcatcher --http-ip 0.0.0.0
-```
+  Install and start `mailcatcher` to monitor the sending of notification
+  emails:
+
+  As a general practice, it's a good idea to run ```gem update --system``` and ```gem update``` before installing additional gems.
+
+  ```shell
+  $ gem install mailcatcher
+  $ mailcatcher --http-ip 0.0.0.0
+  ```
+
+  If you get errors like ```unable to convert "\x89" from ASCII-8BIT to UTF8``` you need to install a version of the rdoc gem that supports the conversion.
+
+  ```
+  $ gem install rdoc
+  $ gem rdoc --all --overwrite
+  ```
 
 * Be sure to have at least one user in your Discourse instance. If not,
-  create one and set the username in `config/import_bbpress.yml`.
+  create one and set the username in `config/import_bbpress.yml`. Details on how to set up an Administrator account can be found [here](https://github.com/discourse/discourse/blob/master/docs/INSTALL-ubuntu.md#administrator-account)
 
 * Edit `config/import_bbpress.yml` with your database connection
   information and `discourse_admin` username.
 
-* Install the `mysql2` gem:
+* Install the mysql gem: `gem install mysql2`
 
-```shell
-$ bundle install
-```
-
-**Note:** You may need to install the header files for mysql. For OS X,
-you can do this with `brew install mysql`; for Debian, `sudo apt-get
-install libmysqlclient-dev`; on CentOS/RHEL, `sudo yum install
+  **Note:** You may need to install the header files for mysql.
+  * For **OS X**,
+you can do this with `brew install mysql`;
+  * For **Debian**, `sudo apt-get
+install libmysqlclient-dev`;
+  * For **CentOS/RHEL**, `sudo yum install
 mysql-devel`.
 
 * Copy `config/import_bbpress.yml` to your `discourse/config` directory
@@ -54,13 +66,18 @@ mysql-devel`.
   directory
 * In your discourse instance, run `rake import:bbpress`
 
-**Note:** if you are running multisite, you will need pass your database
+  **Note:** if you are running multisite, you will need pass your database
 instance: `export RAILS_DB=<your_database> rake import:bbpress`
 
 * Cross your fingers
 * If everything worked, deploy
 * Be sure to have your users reset their passwords on the new Discourse
   site.
+  
+# Extra
+* I encountered issues running the importer due to the **scrub** function patch in `lib/freedom_patches/scrub.rb`. Just in case you do run into a scrub error, modify this file to run the import then revert back after your done. I just changed `def scrub` to `def scrub2`.
+* If you run into `"You are trying to install in deployment mode after changing your Gemfile."` errors, just follow the instructions given. Run `bundle install` elsewhere and add the Gemfile.lock to version control.
+
 
 # Contributing
 
