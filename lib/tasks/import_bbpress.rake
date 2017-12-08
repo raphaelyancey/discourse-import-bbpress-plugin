@@ -243,7 +243,7 @@ def sql_import_posts
         "import: #{post_creator.errors.full_messages}".red
     else
       post_serializer = PostSerializer.new(post, scope: true, root: false)
-      post_serializer.topic_slug = post.topic.slug if post.topic.present?
+      #post_serializer.topic_slug = post.topic.slug if post.topic.present?
       post_serializer.draft_sequence = DraftSequence.current(dc_user, post.topic.draft_key)
       # save id to hash
       topics[bbpress_post['topic_id']] = post.topic.id if is_new_topic
@@ -422,10 +422,10 @@ def dc_set_temporary_site_settings
   SiteSetting.send("min_post_length=", 1) # never set this to 0
   SiteSetting.send("newuser_spam_host_threshold=", 1000)
   SiteSetting.send("min_topic_title_length=", 2)
-  SiteSetting.send("max_topic_title_length=", 512)
+  SiteSetting.send("max_topic_title_length=", 255)
   SiteSetting.send("newuser_max_links=", 1000)
   SiteSetting.send("newuser_max_images=", 1000)
-  SiteSetting.send("max_word_length=", 5000)
+  #SiteSetting.send("max_word_length=", 5000)
   SiteSetting.send("email_time_window_mins=", 1)
 end
 
@@ -443,7 +443,7 @@ def dc_backup_site_settings
   s['min_topic_title_length']       = SiteSetting.min_topic_title_length
   s['newuser_max_links']            = SiteSetting.newuser_max_links
   s['newuser_max_images']           = SiteSetting.newuser_max_images
-  s['max_word_length']              = SiteSetting.max_word_length
+  #s['max_word_length']              = SiteSetting.max_word_length
   s['email_time_window_mins']       = SiteSetting.email_time_window_mins
   s['max_topic_title_length']       = SiteSetting.max_topic_title_length
 
@@ -463,7 +463,7 @@ def dc_restore_site_settings
   SiteSetting.send("min_topic_title_length=", s['min_topic_title_length'])
   SiteSetting.send("newuser_max_links=", s['newuser_max_links'])
   SiteSetting.send("newuser_max_images=", s['newuser_max_images'])
-  SiteSetting.send("max_word_length=", s['max_word_length'])
+  #SiteSetting.send("max_word_length=", s['max_word_length'])
   SiteSetting.send("email_time_window_mins=", s['email_time_window_mins'])
   SiteSetting.send("max_topic_title_length=", s['max_topic_title_length'])
 end
