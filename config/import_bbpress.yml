@@ -5,6 +5,7 @@
 # database stuff
 # database stuff
 sql_server: localhost
+sql_port: 3306
 sql_user: bbpress
 sql_database: bbpress
 sql_password: replaceme
