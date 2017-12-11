@@ -97,6 +97,7 @@ def sql_connect
   begin
     @sql = Mysql2::Client.new(
       :host => @config['sql_server'],
+      :port => @config['sql_port'],
       :username => @config['sql_user'],
       :password => @config['sql_password'],
       :database => @config['sql_database']
