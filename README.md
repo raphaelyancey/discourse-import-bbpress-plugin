@@ -19,9 +19,10 @@ installation first.
   
 * Head over to the discourse directory `cd /var/www/discourse`
 
-* **Important:** *disable* your email configuration or you will spam all your users with hundreds of emails.
+* **IMPORTANT:** *disable* your email configuration or you will spam all your users with hundreds of emails.
 
-  Add this to your environment config: `config/environments/development.rb`
+  Add this to your environment (`production` or `development`) config: `config/environments/[your environment].rb`
+  If run through the [official Docker Discourse](https://github.com/discourse/discourse_docker), this is `production.rb`.
 
   ```ruby
   config.action_mailer.delivery_method = :test
