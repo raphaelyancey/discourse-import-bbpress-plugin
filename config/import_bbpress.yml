@@ -4,13 +4,13 @@
 
 # database stuff
 # database stuff
-sql_server: localhost
+sql_server: bbpress_db
 sql_user: bbpress
 sql_database: bbpress
-sql_password: replaceme
+sql_password: bbpress
 
 # User with admin privileges to create users and category
-discourse_admin: forumadmin
+discourse_admin: system
 
 # If true then nothing will be written to the Discourse database
 test_mode: true
