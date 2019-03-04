@@ -313,18 +313,14 @@ def sql_fetch_users
   loop do
     count = 0
     query = <<EOQ
-      SELECT wp.id,
-             wp.user_login,
-             wp.user_pass,
-             wp.user_nicename,
-             wp.user_email,
-             wp.user_url,
-             wp.user_registered,
-             wp.user_status,
-             wp.display_name
-      FROM wp_users wp
-      INNER JOIN wp_bp_messages_messages bb ON bb.sender_id=wp.ID
-      GROUP BY wp.ID
+      SELECT u.*
+      FROM wp_users u
+      INNER JOIN
+        (SELECT wp_posts.*
+         FROM wp_posts
+         WHERE (wp_posts.post_type IN ('topic',
+                                       'reply'))) p ON p.post_author=u.ID
+      GROUP BY u.ID
       LIMIT #{offset}, 50;
 EOQ
 
