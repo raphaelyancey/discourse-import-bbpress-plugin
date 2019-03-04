@@ -263,7 +263,7 @@ end
 
 def create_users
   @bbpress_users.each do |bbpress_user|
-    dc_username = bbpress_username_to_dc(bbpress_user['user_nicename'])
+    dc_username = bbpress_username_to_dc(bbpress_user['user_login'])
     if(dc_username.length < 3)
       dc_username = dc_username.ljust(3, '0')
     end
