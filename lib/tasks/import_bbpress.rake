@@ -313,7 +313,7 @@ def sql_fetch_users
   loop do
     count = 0
     query = <<EOQ
-      SELECT u.*
+      SELECT u.ID as id, u.*
       FROM wp_users u
       INNER JOIN
         (SELECT wp_posts.*
