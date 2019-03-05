@@ -1,3 +1,8 @@
+# Forked ?
+
+- Solves some incompatibilities with the latest versions of Discourse, and a few bugs
+- Only import users that posted at least one reply or topic in bbPress (not other WordPress users)
+
 # What is this
 
 This set of rake tasks imports users, threads, and posts from a bbPress
