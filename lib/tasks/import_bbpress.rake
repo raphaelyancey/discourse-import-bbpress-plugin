@@ -154,6 +154,11 @@ end
 
 def sql_import_posts
   topics = {}
+  
+  # Keeping track of the IDs
+  f = File.open('/shared/tmp/posts_imports.csv', 'w')
+  f.write("bbpress_id;discourse_id\n")
+
   @bbpress_posts.each do |bbpress_post|
     @post_count += 1
 
@@ -250,8 +255,14 @@ def sql_import_posts
       # save id to hash
       topics[bbpress_post['topic_id']] = post.topic.id if is_new_topic
       puts "\nThe topic thread for '#{topic_title}' was created".green if is_new_topic
+
+      bbpress_id = bbpress_post['topic_id']
+      discourse_id = post['id']
+      f.write("#{bbpress_id};#{discourse_id}\n")
     end
   end
+
+  f.close()
 end
 
 # Returns a Discourse category where imported posts will go
@@ -265,6 +276,11 @@ def create_category(name, owner)
 end
 
 def create_users
+
+  # Keeping track of the IDs
+  f = File.open('/shared/tmp/users_imports.csv', 'w')
+  f.write("bbpress_id;discourse_id\n")
+
   @bbpress_users.each do |bbpress_user|
     dc_username = bbpress_username_to_dc(bbpress_user['user_login'])
     if(dc_username.length < 3)
@@ -301,10 +317,17 @@ def create_users
         abort
       end
       puts "User (#{bbpress_user['id']}) #{bbpress_user['user_login']} (#{dc_username} / #{dc_email}) created".green
+
+      bbpress_id = bbpress_user['id']
+      discourse_id = dc_user['id']
+      f.write("#{bbpress_id};#{discourse_id}\n")
     else
       puts "User (#{bbpress_user['id']}) #{bbpress_user['user_login']} (#{dc_username} / #{dc_email}) found".yellow
     end
   end
+
+  f.close()
+
 end
 
 def create_parent_category
