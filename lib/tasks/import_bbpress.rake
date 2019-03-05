@@ -71,6 +71,9 @@ namespace :import do
         puts "\n*** Creating Discourse users".yellow
         create_users
 
+        puts "\n*** Creating parent category".yellow
+        create_parent_category
+
         puts "\n*** Importing posts and topics to Discourse".yellow
         sql_import_posts
 
@@ -255,7 +258,7 @@ end
 def create_category(name, owner)
   if Category.where('name = ?', name).empty? then
     puts "\nCreating category '#{name}'".yellow
-    Category.create!(name: name, user_id: owner.id)
+    Category.create!(name: name, user_id: owner.id, parent_category_id: @parent_cat.id)
   else
     Category.where('name = ?', name).first
   end
@@ -301,6 +304,14 @@ def create_users
     else
       puts "User (#{bbpress_user['id']}) #{bbpress_user['user_login']} (#{dc_username} / #{dc_email}) found".yellow
     end
+  end
+end
+
+def create_parent_category
+  if Category.where('name = ?', 'bbpress import').empty? then
+    @parent_cat = Category.create!(name: 'bbpress import', user_id: DC_ADMIN.id)
+  else
+    @parent_cat = Category.where('name = ?', 'bbpress import')
   end
 end
 
