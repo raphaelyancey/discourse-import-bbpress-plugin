@@ -347,14 +347,28 @@ def sql_fetch_users
   loop do
     count = 0
     query = <<EOQ
-      SELECT u.ID as id, u.*
-      FROM wp_users u
-      INNER JOIN
-        (SELECT wp_posts.*
-         FROM wp_posts
-         WHERE (wp_posts.post_type IN ('topic',
-                                       'reply'))) p ON p.post_author=u.ID
-      GROUP BY u.ID
+        (SELECT DISTINCT u.ID AS id,
+                         u.user_login,
+                         u.user_email,
+                         u.display_name
+         FROM wp_users u
+         INNER JOIN
+           (SELECT wp_posts.*
+            FROM wp_posts
+            WHERE (wp_posts.post_type IN ('topic',
+                                          'reply'))) p ON p.post_author=u.ID)
+      UNION DISTINCT
+        (SELECT DISTINCT u.ID AS id,
+                         u.user_login,
+                         u.user_email,
+                         u.display_name
+         FROM wp_users u
+         WHERE u.ID IN
+             (SELECT DISTINCT sender_id
+              FROM private_messages)
+           OR u.ID IN
+             (SELECT DISTINCT recipient_id
+              FROM private_messages))
       LIMIT #{offset}, 50;
 EOQ
 

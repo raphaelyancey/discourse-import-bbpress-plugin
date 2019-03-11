@@ -1,7 +1,7 @@
 # Forked ?
 
 - Solves some incompatibilities with the latest versions of Discourse, and a few bugs
-- Only import users that posted at least one reply or topic in bbPress (not other WordPress users)
+- Only import users that posted at least one reply or topic in bbPress (not other WordPress users) or a private message to another user
 
 # What is this
 
