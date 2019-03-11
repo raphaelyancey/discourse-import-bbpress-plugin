@@ -279,7 +279,7 @@ def create_users
 
   # Keeping track of the IDs
   f = File.open('/shared/tmp/users_imports.csv', 'w')
-  f.write("bbpress_id;discourse_id\n")
+  f.write("bbpress_id;discourse_id;discourse_username\n")
 
   @bbpress_users.each do |bbpress_user|
     dc_username = bbpress_username_to_dc(bbpress_user['user_login'])
@@ -320,7 +320,8 @@ def create_users
 
       bbpress_id = bbpress_user['id']
       discourse_id = dc_user['id']
-      f.write("#{bbpress_id};#{discourse_id}\n")
+      discourse_username = dc_user['username']
+      f.write("#{bbpress_id};#{discourse_id};#{discourse_username}\n")
     else
       puts "User (#{bbpress_user['id']}) #{bbpress_user['user_login']} (#{dc_username} / #{dc_email}) found".yellow
     end
