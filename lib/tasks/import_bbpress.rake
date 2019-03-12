@@ -154,11 +154,6 @@ end
 
 def sql_import_posts
   topics = {}
-  
-  # Keeping track of the IDs
-  f = File.open('/shared/tmp/posts_imports.csv', 'w')
-  f.write("bbpress_id;discourse_id\n")
-
   @bbpress_posts.each do |bbpress_post|
     @post_count += 1
 
@@ -258,11 +253,10 @@ def sql_import_posts
 
       bbpress_id = bbpress_post['topic_id']
       discourse_id = post['id']
-      f.write("#{bbpress_id};#{discourse_id}\n")
+      query = "INSERT INTO posts_imports (bbpress_id, discourse_id) VALUES (#{bbpress_id}, #{discourse_id});"
+      @sql.query query
     end
   end
-
-  f.close()
 end
 
 # Returns a Discourse category where imported posts will go
@@ -276,11 +270,6 @@ def create_category(name, owner)
 end
 
 def create_users
-
-  # Keeping track of the IDs
-  f = File.open('/shared/tmp/users_imports.csv', 'w')
-  f.write("bbpress_id;discourse_id;discourse_username\n")
-
   @bbpress_users.each do |bbpress_user|
     dc_username = bbpress_username_to_dc(bbpress_user['user_login'])
     if(dc_username.length < 3)
@@ -321,14 +310,12 @@ def create_users
       bbpress_id = bbpress_user['id']
       discourse_id = dc_user['id']
       discourse_username = dc_user['username']
-      f.write("#{bbpress_id};#{discourse_id};#{discourse_username}\n")
+      query = "INSERT INTO users_imports (bbpress_id, discourse_id, discourse_username) VALUES (#{bbpress_id}, #{discourse_id}, #{discourse_username});"
+      @sql.query query
     else
       puts "User (#{bbpress_user['id']}) #{bbpress_user['user_login']} (#{dc_username} / #{dc_email}) found".yellow
     end
   end
-
-  f.close()
-
 end
 
 def create_parent_category
@@ -358,19 +345,18 @@ def sql_fetch_users
             FROM wp_posts
             WHERE (wp_posts.post_type IN ('topic',
                                           'reply'))) p ON p.post_author=u.ID)
-      UNION DISTINCT
-        (SELECT DISTINCT u.ID AS id,
-                         u.user_login,
-                         u.user_email,
-                         u.display_name
-         FROM wp_users u
-         WHERE u.ID IN
-             (SELECT DISTINCT sender_id
-              FROM private_messages)
-           OR u.ID IN
-             (SELECT DISTINCT recipient_id
-              FROM private_messages))
-      LIMIT #{offset}, 50;
+      UNION DISTINCT (
+      SELECT DISTINCT u.ID AS id,
+                      u.user_login,
+                      u.user_email,
+                      u.display_name
+      FROM wp_users u
+      WHERE u.ID IN
+          (SELECT DISTINCT user_id
+           FROM wp_bp_messages_recipients
+           WHERE thread_id IN
+               (SELECT DISTINCT thread_id
+                FROM private_messages))) LIMIT #{offset}, 50;
 EOQ
 
     puts query.yellow if offset == 0
