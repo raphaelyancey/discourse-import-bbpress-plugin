@@ -1,7 +1,16 @@
-# Forked ?
+# Fork improvements
 
 - Solves some incompatibilities with the latest versions of Discourse, and a few bugs
 - Only import users that posted at least one reply or topic in bbPress (not other WordPress users) or a private message to another user
+
+## Requirements
+
+- SQL tables (in the database used by the script) to host the relations between the bbPress IDs and the Discourse IDs
+
+```sql
+CREATE TABLE `posts_imports` ( `bbpress_id` INT NOT NULL , `discourse_id` INT NOT NULL , UNIQUE (`bbpress_id`)) ENGINE = InnoDB;
+CREATE TABLE `users_imports` ( `bbpress_id` INT NOT NULL , `discourse_id` INT NOT NULL , `discourse_username` VARCHAR(255) NOT NULL , UNIQUE (`bbpress_id`)) ENGINE = InnoDB;
+```
 
 # What is this
 

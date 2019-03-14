@@ -253,7 +253,7 @@ def sql_import_posts
 
       bbpress_id = bbpress_post['topic_id']
       discourse_id = post['id']
-      query = "INSERT INTO posts_imports (bbpress_id, discourse_id) VALUES (#{bbpress_id}, #{discourse_id});"
+      query = "INSERT INTO posts_imports (bbpress_id, discourse_id) VALUES ('#{bbpress_id}', '#{discourse_id}');"
       @sql.query query
     end
   end
@@ -310,7 +310,7 @@ def create_users
       bbpress_id = bbpress_user['id']
       discourse_id = dc_user['id']
       discourse_username = dc_user['username']
-      query = "INSERT INTO users_imports (bbpress_id, discourse_id, discourse_username) VALUES (#{bbpress_id}, #{discourse_id}, #{discourse_username});"
+      query = "INSERT INTO users_imports (bbpress_id, discourse_id, discourse_username) VALUES ('#{bbpress_id}', '#{discourse_id}', '#{discourse_username}');"
       @sql.query query
     else
       puts "User (#{bbpress_user['id']}) #{bbpress_user['user_login']} (#{dc_username} / #{dc_email}) found".yellow
