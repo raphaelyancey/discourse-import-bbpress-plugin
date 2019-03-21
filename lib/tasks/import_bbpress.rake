@@ -155,6 +155,13 @@ end
 def sql_import_posts
   topics = {}
   @bbpress_posts.each do |bbpress_post|
+
+    exists = @sql.query "SELECT * FROM posts_imports WHERE bbpress_id = #{bbpress_post['topic_id']}"
+    if exists.count > 0
+      puts "Post BB##{bbpress_post['topic_id']} has already been imported".yellow
+      next
+    end
+
     @post_count += 1
 
     # details on writer of the post
