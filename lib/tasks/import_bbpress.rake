@@ -307,7 +307,8 @@ def create_users
           email: dc_email,
           active: true,
           approved: true,
-          admin: admin
+          admin: admin,
+          custom_fields: {"bbpress_user_id": bbpress_user['id']}
         )
       rescue Exception => e
         puts "Error #{e} on user #{dc_username} <#{dc_email}>"
