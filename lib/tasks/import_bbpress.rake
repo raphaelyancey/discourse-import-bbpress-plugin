@@ -189,6 +189,8 @@ def sql_import_posts
     # create!
     post_creator = nil
 
+    custom_fields = {"bbpress_post_id": bbpress_post['topic_id']}
+
     if is_new_topic
       # create category if it doesn't exist
       category = create_category(
@@ -207,7 +209,8 @@ def sql_import_posts
             archetype: 'regular',
             category: category.name,
             created_at: Time.at(bbpress_post['post_time']),
-            updated_at: Time.at(bbpress_post['post_time'])
+            updated_at: Time.at(bbpress_post['post_time']),
+            custom_fields: custom_fields
           )
 
           ## for a new topic: also clear mail deliveries
@@ -224,7 +227,8 @@ def sql_import_posts
         skip_validations: true,
         topic_id: topic,
         created_at: Time.at(bbpress_post['post_time']),
-        updated_at: Time.at(bbpress_post['post_time'])
+        updated_at: Time.at(bbpress_post['post_time']),
+        custom_fields: custom_fields
       )
     end
 
@@ -233,7 +237,7 @@ def sql_import_posts
     begin
       post = post_creator.create
     rescue Exception => e
-      puts "Error #{e} on post #{bbpress_post['post_id']}:\n#{text}"
+      puts "Error #{e} on post #{bbpress_post['topic_id']}:\n#{text}"
       puts "--"
       puts e.inspect
       puts e.backtrace
@@ -242,7 +246,7 @@ def sql_import_posts
 
     # Everything set, save the topic
     if post_creator.errors.present? # Skip if not valid for some reason
-      puts "\nContents of topic from post #{bbpress_post['post_id']} failed to ".red+
+      puts "\nContents of topic from post #{bbpress_post['topic_id']} failed to ".red+
         "import: #{post_creator.errors.full_messages}".red
     else
       post_serializer = PostSerializer.new(post, scope: true, root: false)
